@@ -37,6 +37,7 @@ class ShiftBase(SQLModel):
 
 class Shift(ShiftBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    org_id: uuid.UUID = Field(foreign_key="org.id", index=True)
     created_at: datetime | None = Field(
         default_factory=get_datetime_utc,
         sa_type=DateTime(timezone=True),  # type: ignore
@@ -50,7 +51,7 @@ class SignUpBase(SQLModel):
 
 class SignUp(SignUpBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    shift_id: uuid.UUID = Field(foreign_key="shift.id")
+    shift_id: uuid.UUID = Field(foreign_key="shift.id", index=True)
     created_at: datetime | None = Field(
         default_factory=get_datetime_utc,
         sa_type=DateTime(timezone=True),  # type: ignore
