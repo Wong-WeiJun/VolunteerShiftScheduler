@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import (
     APIRouter,
     Depends,
@@ -13,6 +15,8 @@ from app.core.schemas import (
     OrgDashboardResponse,
     ShiftResponse,
     ShiftCreate,
+    SignUpDetail,
+    ShiftDetailResponse,
 )
 from app.core.database import get_db
 from sqlalchemy import func, select
@@ -141,4 +145,41 @@ async def createShift(
         capacity=new_shift.capacity,
         notes=new_shift.notes,
         signup_count=0,
+    )
+
+
+@router.get("/{slug}/shifts/{shift_id}", response_model=ShiftDetailResponse)
+async def getShiftDetail(
+    slug: str, shift_id: UUID, db: Annotated[AsyncSession, Depends(get_db)]
+) -> Any:
+    statement = (
+        select(Shift, func.count(SignUp.id).label("signup_count"))
+        .join(Org, Org.id == Shift.org_id)
+        .join(SignUp, Shift.id == SignUp.shift_id, isouter=True)
+        .where(Org.slug == slug)
+        .where(Shift.id == shift_id)
+        .group_by(Shift.id)
+    )
+    result = await db.execute(statement)
+    row = result.first()
+
+    if row is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Shift not found for the specified organization.",
+        )
+
+    shift_obj, signup_count = row
+
+    return ShiftDetailResponse(
+        id=shift_obj.id,
+        org_id=shift_obj.org_id,
+        title=shift_obj.title,
+        date=shift_obj.date,
+        start_time=shift_obj.start_time,
+        end_time=shift_obj.end_time,
+        location=shift_obj.location,
+        capacity=shift_obj.capacity,
+        notes=shift_obj.notes,
+        signup_count=signup_count,
     )

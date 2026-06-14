@@ -47,9 +47,20 @@ class ShiftCreate(BaseModel):
     notes: str
 
 
-# class S(BaseModel):
-#     slug: str = Field(max_length=160)
-#     admin_token: str
-#
-#     class Config:
-#         from_attributes = True
+class SignUpDetail(BaseModel):
+    id: UUID
+    name: str
+    email: EmailStr
+
+
+class ShiftDetailResponse(BaseModel):
+    id: UUID
+    org_id: UUID
+    title: str
+    date: date
+    start_time: time
+    end_time: time
+    location: str
+    capacity: int
+    notes: str | None
+    signup_count: int
