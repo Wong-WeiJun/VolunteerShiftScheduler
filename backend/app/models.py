@@ -1,8 +1,8 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, date, time, timezone
 
 from pydantic import EmailStr
-from sqlalchemy import DateTime, Date
+from sqlalchemy import DateTime
 from sqlmodel import Field, SQLModel
 
 
@@ -27,11 +27,12 @@ class Org(OrgBase, table=True):
 
 class ShiftBase(SQLModel):
     title: str = Field(min_length=8, max_length=128)
-    date: Date
-    start_time: DateTime
-    end_time: DateTime
+    date: date
+    start_time: time
+    end_time: time
     location: str = Field(max_length=128)
-    capacity: int
+    capacity: int = Field(gt=0)
+    notes: str | None = Field(default=None, max_length=1024)
 
 
 class Shift(ShiftBase, table=True):
