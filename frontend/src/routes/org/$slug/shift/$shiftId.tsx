@@ -69,7 +69,7 @@ function ShiftDetailPage() {
     )
   }
 
-  const signupCount = shift.signups?.length ?? 0
+  const signupCount = shift.signupCount ?? 0
   const spotsLeft = shift.capacity - signupCount
   const isFull = spotsLeft <= 0
 

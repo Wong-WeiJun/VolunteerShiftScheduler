@@ -60,7 +60,7 @@ export interface Shift {
   capacity: number
   notes: string
   createdAt: string
-  signups?: Signup[]
+  signupsCount?: number
 }
 
 export interface ShiftWithSignupCount extends Shift {
