@@ -18,19 +18,19 @@ export const Route = createRoute({
 function LandingPage() {
   const navigate = useNavigate()
   const [orgName, setOrgName] = useState("")
-  const [adminEmail, setAdminEmail] = useState("")
+  const [admin_email, setAdminEmail] = useState("")
 
   const mutation = useMutation({
     mutationFn: createOrg,
     onSuccess: (data) => {
-      navigate({ to: "/org/$slug/admin", params: { slug: data.slug }, search: { token: data.adminToken } })
+      navigate({ to: "/org/$slug/admin", params: { slug: data.slug }, search: { token: data.admin_token } })
     },
   })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!orgName.trim() || !adminEmail.trim()) return
-    mutation.mutate({ name: orgName.trim(), adminEmail: adminEmail.trim() })
+    if (!orgName.trim() || !admin_email.trim()) return
+    mutation.mutate({ name: orgName.trim(), admin_email: admin_email.trim() })
   }
 
   return (
@@ -109,7 +109,7 @@ function LandingPage() {
                     id="admin-email"
                     type="email"
                     placeholder="you@organization.org"
-                    value={adminEmail}
+                    value={admin_email}
                     onChange={(e) => setAdminEmail(e.target.value)}
                     required
                   />

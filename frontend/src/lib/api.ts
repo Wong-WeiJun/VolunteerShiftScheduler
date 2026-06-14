@@ -35,8 +35,8 @@ export interface Org {
   id: number
   slug: string
   name: string
-  adminEmail: string
-  adminToken: string
+  admin_email: string
+  admin_token: string
   createdAt: string
 }
 
@@ -73,7 +73,7 @@ export interface OrgWithShifts extends Org {
 
 export interface CreateOrgInput {
   name: string
-  adminEmail: string
+  admin_email: string
 }
 
 export interface CreateShiftInput {
