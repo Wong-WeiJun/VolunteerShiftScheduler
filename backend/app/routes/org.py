@@ -7,7 +7,13 @@ from fastapi import (
 from app.core.config import settings
 from typing import Any, Annotated
 from app.models import Org, Shift, SignUp
-from app.core.schemas import OrgCreate, OrgResponse, OrgDashboardResponse, ShiftResponse
+from app.core.schemas import (
+    OrgCreate,
+    OrgResponse,
+    OrgDashboardResponse,
+    ShiftResponse,
+    ShiftCreate,
+)
 from app.core.database import get_db
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -93,4 +99,46 @@ async def getShifts(slug: str, db: Annotated[AsyncSession, Depends(get_db)]) -> 
 
     return OrgDashboardResponse(
         id=first_org.id, name=first_org.name, slug=first_org.slug, shifts=shifts_list
+    )
+
+
+@router.post("/{slug}/shifts", response_model=ShiftResponse)
+async def createShift(
+    slug: str, payload: ShiftCreate, db: Annotated[AsyncSession, Depends(get_db)]
+) -> ShiftResponse:
+    statement = select(Org.id).where(Org.slug == slug)
+
+    result = await db.execute(statement)
+    org_id = result.scalar_one_or_none()
+    if not org_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Organization not found"
+        )
+
+    new_shift = Shift(
+        org_id=org_id,
+        title=payload.title,
+        date=payload.date,
+        start_time=payload.start_time,
+        end_time=payload.end_time,
+        location=payload.location,
+        capacity=payload.capacity,
+        notes=payload.notes,
+    )
+
+    db.add(new_shift)
+
+    await db.commit()
+
+    await db.refresh(new_shift)
+    return ShiftResponse(
+        id=new_shift.id,
+        title=new_shift.title,
+        date=new_shift.date,
+        start_time=new_shift.start_time,
+        end_time=new_shift.end_time,
+        location=new_shift.location,
+        capacity=new_shift.capacity,
+        notes=new_shift.notes,
+        signup_count=0,
     )
