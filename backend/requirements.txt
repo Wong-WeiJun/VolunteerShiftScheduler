@@ -1,0 +1,10 @@
+fastapi==0.128.*
+uvicorn[standard]==0.40.*
+sqlmodel==0.0.33
+pydantic==2.12.*
+pydantic-settings==2.3.*
+psycopg2-binary==2.9.*
+email-validator==2.2.*
+alembic==1.15.*
+python-multipart==0.0.9
+psycopg
