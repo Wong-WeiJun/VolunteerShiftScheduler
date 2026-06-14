@@ -35,3 +35,21 @@ class OrgDashboardResponse(BaseModel):
     name: str
     slug: str
     shifts: List[ShiftResponse]
+
+
+class ShiftCreate(BaseModel):
+    title: str
+    date: date
+    start_time: time
+    end_time: time
+    location: str
+    capacity: int
+    notes: str
+
+
+# class S(BaseModel):
+#     slug: str = Field(max_length=160)
+#     admin_token: str
+#
+#     class Config:
+#         from_attributes = True
