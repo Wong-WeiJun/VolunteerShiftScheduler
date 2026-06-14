@@ -1,4 +1,23 @@
-# Logs
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.pem
+
+# ── IDE / Editors ─────────────────────────────────────────────────────────────
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea
+*.swp
+*.swo
+*~
+
+# ── Environment / Secrets ───────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
 logs
 *.log
 npm-debug.log*
@@ -7,20 +26,55 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# ── Frontend (Vite / Node) ──────────────────────────────────────────────────
 node_modules
 dist
 dist-ssr
+build
 *.local
+.cache
+.eslintcache
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# ── Backend (Python) ──────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+pip-log.txt
+pip-delete-this-directory.txt
+*.egg-info/
+dist/
+build/
+*.egg
+*.whl
 
+# ── Alembic ───────────────────────────────────────────────────────────────────
+# Keep migration scripts; ignore compiled cache
+alembic/__pycache__/
+alembic/versions/__pycache__/
+
+# ── Databases ─────────────────────────────────────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+# If you store local data volumes in-repo
+docker-compose.override.yml
+
+# ── Testing / Coverage ────────────────────────────────────────────────────────
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+.nox/
+
+# ── Claude Code ───────────────────────────────────────────────────────────────
 .claude
