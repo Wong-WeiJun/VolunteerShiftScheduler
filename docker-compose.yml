@@ -1,17 +1,65 @@
-version: "3.8"
-
 services:
   db:
-    image: postgres:16
+    image: postgres:16-alpine
     container_name: shiftmate-db
     environment:
       POSTGRES_DB: app
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      # Exposed for local dev access (e.g., running alembic from host)
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d app"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: shiftmate-backend
+    ports:
+      - "8000:8000"
+    environment:
+      # Override .env values for Docker networking
+      PROJECT_NAME: ShiftMate
+      POSTGRES_SERVER: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: app
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      SECRET_KEY: dev-secret-key-change-in-production
+      FIRST_SUPERUSER: admin@example.com
+      FIRST_SUPERUSER_PASSWORD: admin123
+      FRONTEND_HOST: http://localhost:5173
+      BACKEND_CORS_ORIGINS: "http://localhost,http://localhost:5173"
+      ENVIRONMENT: local
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # Mount source for hot-reload during development
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build: ./frontend
+    container_name: shiftmate-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:8000
+    depends_on:
+      - backend
+    volumes:
+      # Mount source for hot-reload; node_modules is a named volume so host
+      # node_modules doesn't shadow the container's
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    command: npm run dev -- --host
 
 volumes:
   postgres_data:
+  frontend_node_modules:
