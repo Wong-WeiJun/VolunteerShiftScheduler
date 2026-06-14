@@ -15,10 +15,13 @@ from app.core.schemas import (
     OrgDashboardResponse,
     ShiftResponse,
     ShiftCreate,
-    SignUpDetail,
     ShiftDetailResponse,
+    SignUpCreate,
+    SignUpResponse,
+    ShiftSummary,
+    AdminSignUpResponse,
 )
-from app.core.database import get_db
+from app.core.database import get_db, get_org_from_token
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
@@ -183,3 +186,78 @@ async def getShiftDetail(
         notes=shift_obj.notes,
         signup_count=signup_count,
     )
+
+
+@router.post("/{slug}/shifts/{shift_id}/signup", response_model=SignUpResponse)
+async def signupForShift(
+    slug: str,
+    shift_id: UUID,
+    payload: SignUpCreate,
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> SignUpResponse:
+    statement = (
+        select(Shift, func.count(SignUp.id).label("signup_count"))
+        .join(Org, Org.id == Shift.org_id)
+        .join(SignUp, Shift.id == SignUp.shift_id, isouter=True)
+        .where(Org.slug == slug)
+        .where(Shift.id == shift_id)
+        .group_by(Shift.id)
+    )
+    result = await db.execute(statement)
+    row = result.first()
+
+    if row is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Shift not found"
+        )
+
+    shift_obj, signup_count = row
+
+    if signup_count >= shift_obj.capacity:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="This shift is full"
+        )
+
+    new_signup = SignUp(
+        shift_id=shift_id,
+        name=payload.name,
+        email=payload.email,
+    )
+    db.add(new_signup)
+    await db.commit()
+    await db.refresh(new_signup)
+
+    return SignUpResponse(
+        id=new_signup.id,
+        name=new_signup.name,
+        email=new_signup.email,
+        shift_id=new_signup.shift_id,
+        created_at=new_signup.created_at,
+    )
+
+
+@router.get("/{slug}/signups", response_model=list[AdminSignUpResponse])
+async def getOrgSignups(
+    slug: str,
+    org: Annotated[Org, Depends(get_org_from_token)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> Any:
+    statement = (
+        select(SignUp, Shift)
+        .join(Shift, Shift.id == SignUp.shift_id)
+        .where(Shift.org_id == org.id)
+        .order_by(SignUp.created_at.desc())
+    )
+    result = await db.execute(statement)
+    rows = result.all()
+
+    return [
+        AdminSignUpResponse(
+            id=signup.id,
+            name=signup.name,
+            email=signup.email,
+            created_at=signup.created_at,
+            shift=ShiftSummary(id=shift.id, title=shift.title),
+        )
+        for signup, shift in rows
+    ]
