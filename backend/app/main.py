@@ -1,16 +1,29 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
+from sqlmodel import SQLModel
 from starlette.middleware.cors import CORSMiddleware
-from app.routes import org
+
 from app.core.config import settings
+from app.core.database import engine
+from app.routes import org
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
     return f"{route.tags[0]}-{route.name}"
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with engine.begin() as conn:
+        await conn.run_sync(SQLModel.metadata.create_all)
+    yield
+
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
+    lifespan=lifespan,
     generate_unique_id_function=custom_generate_unique_id,
     redirect_slashes=False,
 )
