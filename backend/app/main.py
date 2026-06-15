@@ -12,6 +12,7 @@ def custom_generate_unique_id(route: APIRoute) -> str:
 app = FastAPI(
     title=settings.PROJECT_NAME,
     generate_unique_id_function=custom_generate_unique_id,
+    redirect_slashes=False,
 )
 
 # Set all CORS enabled origins
