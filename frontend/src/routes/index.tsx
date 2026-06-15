@@ -23,14 +23,14 @@ function LandingPage() {
   const mutation = useMutation({
     mutationFn: createOrg,
     onSuccess: (data) => {
-      navigate({ to: "/org/$slug/admin", params: { slug: data.slug }, search: { token: data.admin_token } })
+      navigate({ to: "/org/$slug/admin", params: { slug: data.slug }, search: { token: data.adminToken } })
     },
   })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!orgName.trim() || !admin_email.trim()) return
-    mutation.mutate({ name: orgName.trim(), admin_email: admin_email.trim() })
+    mutation.mutate({ orgName: orgName.trim(), email: admin_email.trim() })
   }
 
   return (

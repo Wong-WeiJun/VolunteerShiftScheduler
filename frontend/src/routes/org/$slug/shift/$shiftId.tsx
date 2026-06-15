@@ -28,11 +28,10 @@ function formatDateShort(dateStr: string) {
 
 function ShiftDetailPage() {
   const { slug, shiftId } = Route.useParams()
-  const shiftIdNum = Number(shiftId)
 
   const { data: shift, isLoading, error } = useQuery({
     queryKey: ["shift", slug, shiftId],
-    queryFn: () => getShift(slug, shiftIdNum),
+    queryFn: () => getShift(slug, shiftId),
   })
 
   if (isLoading) {
@@ -148,7 +147,7 @@ function ShiftDetailPage() {
             </p>
           </Card>
         ) : (
-          <SignupForm slug={slug} shiftId={shiftIdNum} />
+          <SignupForm slug={slug} shiftId={shiftId} />
         )}
       </div>
     </div>
@@ -167,13 +166,13 @@ function InfoCard({ icon, label, value }: { icon: React.ReactNode; label: string
   )
 }
 
-function SignupForm({ slug, shiftId }: { slug: string; shiftId: number }) {
+function SignupForm({ slug, shiftId }: { slug: string; shiftId: string }) {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [submitted, setSubmitted] = useState(false)
 
   const mutation = useMutation({
-    mutationFn: () => signupForShift(slug, shiftId, { volunteerName: name.trim(), volunteerEmail: email.trim() }),
+    mutationFn: () => signupForShift(slug, shiftId, { name: name.trim(), email: email.trim() }),
     onSuccess: () => {
       setSubmitted(true)
       setName("")

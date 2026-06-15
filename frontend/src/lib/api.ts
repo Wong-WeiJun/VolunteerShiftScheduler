@@ -50,15 +50,15 @@ export interface Signup {
 }
 
 export interface Shift {
-  id: number
-  orgId: number
+  id: string
+  orgId: string
   title: string
   date: string
   startTime: string
   endTime: string
   location: string
   capacity: number
-  notes: string
+  notes: string | null
   createdAt: string
   signupsCount?: number
 }
@@ -72,8 +72,8 @@ export interface OrgWithShifts extends Org {
 }
 
 export interface CreateOrgInput {
-  name: string
-  admin_email: string
+  orgName: string
+  email: string
 }
 
 export interface CreateShiftInput {
@@ -87,19 +87,28 @@ export interface CreateShiftInput {
 }
 
 export interface SignupInput {
-  volunteerName: string
-  volunteerEmail: string
+  name: string
+  email: string
+}
+
+export interface Signup {
+  id: string
+  name: string
+  email: string
+  shiftId: string
+  createdAt: string
+  shift?: { id: string; title: string }
 }
 
 export function createOrg(data: CreateOrgInput) {
-  return api<Org>("/orgs", { method: "POST", body: JSON.stringify(data) })
+  return api<Org>("/orgs/", { method: "POST", body: JSON.stringify(data) })
 }
 
 export function getOrg(slug: string) {
   return api<OrgWithShifts>(`/orgs/${slug}`)
 }
 
-export function getShift(slug: string, shiftId: number) {
+export function getShift(slug: string, shiftId: string) {
   return api<Shift>(`/orgs/${slug}/shifts/${shiftId}`)
 }
 
@@ -107,7 +116,7 @@ export function createShift(slug: string, data: CreateShiftInput) {
   return api<Shift>(`/orgs/${slug}/shifts`, { method: "POST", body: JSON.stringify(data) })
 }
 
-export function signupForShift(slug: string, shiftId: number, data: SignupInput) {
+export function signupForShift(slug: string, shiftId: string, data: SignupInput) {
   return api<Signup>(`/orgs/${slug}/shifts/${shiftId}/signup`, { method: "POST", body: JSON.stringify(data) })
 }
 

@@ -199,7 +199,7 @@ function ShareLinkRow({ label, url }: { label: string; url: string }) {
   )
 }
 
-function ShiftsTab({ slug, shifts }: { slug: string; shifts: { id: number; title: string; date: string; startTime: string; endTime: string; location: string; capacity: number; signupCount: number }[] }) {
+function ShiftsTab({ slug, shifts }: { slug: string; shifts: { id: string; title: string; date: string; startTime: string; endTime: string; location: string; capacity: number; signupCount: number }[] }) {
   const [showForm, setShowForm] = useState(false)
   const queryClient = useQueryClient()
 
@@ -400,7 +400,7 @@ function ShiftsTab({ slug, shifts }: { slug: string; shifts: { id: number; title
   )
 }
 
-function SignupsTab({ signups, isLoading }: { signups?: { id: number; volunteerName: string; volunteerEmail: string; signedUpAt: string; shift?: { title: string } }[]; isLoading: boolean }) {
+function SignupsTab({ signups, isLoading }: { signups?: { id: string; name: string; email: string; createdAt: string; shift?: { id: string; title: string } }[]; isLoading: boolean }) {
   if (isLoading) {
     return (
       <div className="animate-pulse space-y-3">
@@ -422,10 +422,10 @@ function SignupsTab({ signups, isLoading }: { signups?: { id: number; volunteerN
   const exportCsv = () => {
     const headers = ["Name", "Email", "Shift", "Signed Up At"]
     const rows = signups.map((s) => [
-      s.volunteerName,
-      s.volunteerEmail,
+      s.name,
+      s.email,
       s.shift?.title || "–",
-      formatDateTime(s.signedUpAt),
+      formatDateTime(s.createdAt),
     ])
     const csv = [headers.join(","), ...rows.map((r) => r.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))].join("\n")
     const blob = new Blob([csv], { type: "text/csv" })
@@ -460,12 +460,12 @@ function SignupsTab({ signups, isLoading }: { signups?: { id: number; volunteerN
               </TableRow>
             </TableHeader>
             <TableBody>
-              {signups.sort((a, b) => new Date(b.signedUpAt).getTime() - new Date(a.signedUpAt).getTime()).map((s) => (
+              {signups.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map((s) => (
                 <TableRow key={s.id}>
-                  <TableCell className="font-medium text-ink">{s.volunteerName}</TableCell>
-                  <TableCell>{s.volunteerEmail}</TableCell>
+                  <TableCell className="font-medium text-ink">{s.name}</TableCell>
+                  <TableCell>{s.email}</TableCell>
                   <TableCell>{s.shift?.title || "–"}</TableCell>
-                  <TableCell className="text-muted-foreground">{formatDateTime(s.signedUpAt)}</TableCell>
+                  <TableCell className="text-muted-foreground">{formatDateTime(s.createdAt)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
