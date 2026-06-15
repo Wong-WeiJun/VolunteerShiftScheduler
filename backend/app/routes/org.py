@@ -9,6 +9,7 @@ from fastapi import (
 from app.core.config import settings
 from typing import Any, Annotated
 from app.models import Org, Shift, SignUp
+import app.models as models
 from app.core.schemas import (
     OrgCreate,
     OrgResponse,
