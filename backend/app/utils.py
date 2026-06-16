@@ -61,7 +61,7 @@ def send_signup_confirmation(
 
     resend.Emails.send(
         {
-            "from": "ShiftMate <onboarding@resend.dev>",
+            "from": "ShiftMate <noreply@wongweijun.me>",
             "to": volunteer_email,
             "subject": f"You're signed up for {shift.title}",
             "html": f"""
