@@ -12,6 +12,7 @@ from app.models import Org, Shift, SignUp
 # POST /orgs/ — createOrg
 # ────────────────────────────────────────────────────────────────
 
+
 class TestCreateOrg:
     async def test_create_org_success(self, async_client):
         payload = {"orgName": "Volunteer Group", "email": "admin@example.com"}
@@ -37,6 +38,7 @@ class TestCreateOrg:
 # GET /orgs/{slug} — getShifts
 # ────────────────────────────────────────────────────────────────
 
+
 class TestGetOrgDashboard:
     async def test_get_org_with_no_shifts(self, async_client, sample_org: Org):
         resp = await async_client.get(f"/orgs/{sample_org.slug}")
@@ -48,7 +50,9 @@ class TestGetOrgDashboard:
         assert body["slug"] == sample_org.slug
         assert body["shifts"] == []
 
-    async def test_get_org_with_shifts(self, async_client, db_session: AsyncSession, sample_org: Org):
+    async def test_get_org_with_shifts(
+        self, async_client, db_session: AsyncSession, sample_org: Org
+    ):
         shift = Shift(
             org_id=sample_org.id,
             title="Community Cleanup Drive",
@@ -80,6 +84,7 @@ class TestGetOrgDashboard:
 # ────────────────────────────────────────────────────────────────
 # POST /orgs/{slug}/shifts — createShift
 # ────────────────────────────────────────────────────────────────
+
 
 class TestCreateShift:
     async def test_create_shift_success(self, async_client, sample_org: Org):
@@ -118,8 +123,11 @@ class TestCreateShift:
 # GET /orgs/{slug}/shifts/{shift_id} — getShiftDetail
 # ────────────────────────────────────────────────────────────────
 
+
 class TestGetShiftDetail:
-    async def test_get_shift_detail(self, async_client, db_session: AsyncSession, sample_org: Org):
+    async def test_get_shift_detail(
+        self, async_client, db_session: AsyncSession, sample_org: Org
+    ):
         shift = Shift(
             org_id=sample_org.id,
             title="Food Bank Shift",
@@ -142,12 +150,17 @@ class TestGetShiftDetail:
         assert body["signupCount"] == 0
 
     async def test_get_shift_detail_not_found(self, async_client, sample_org: Org):
-        resp = await async_client.get(f"/orgs/{sample_org.slug}/shifts/nonexistent-uuid")
+        resp = await async_client.get(
+            f"/orgs/{sample_org.slug}/shifts/nonexistent-uuid"
+        )
         assert resp.status_code == 422  # UUID validation fails
 
-    async def test_get_shift_detail_wrong_org(self, async_client, db_session: AsyncSession, sample_org: Org):
+    async def test_get_shift_detail_wrong_org(
+        self, async_client, db_session: AsyncSession, sample_org: Org
+    ):
         # Second org with no shift
         import secrets
+
         other_org = Org(
             name="Other Org",
             admin_email="other@example.com",
@@ -180,8 +193,11 @@ class TestGetShiftDetail:
 # POST /orgs/{slug}/shifts/{shift_id}/signup — signupForShift
 # ────────────────────────────────────────────────────────────────
 
+
 class TestSignUpForShift:
-    async def test_signup_success(self, async_client, db_session: AsyncSession, sample_org: Org):
+    async def test_signup_success(
+        self, async_client, db_session: AsyncSession, sample_org: Org
+    ):
         shift = Shift(
             org_id=sample_org.id,
             title="Helper Shift",
@@ -207,7 +223,9 @@ class TestSignUpForShift:
         assert body["email"] == "alice@example.com"
         assert body["shiftId"] == str(shift.id)
 
-    async def test_signup_shift_full(self, async_client, db_session: AsyncSession, sample_org: Org):
+    async def test_signup_shift_full(
+        self, async_client, db_session: AsyncSession, sample_org: Org
+    ):
         shift = Shift(
             org_id=sample_org.id,
             title="Tiny Shift",
@@ -222,7 +240,9 @@ class TestSignUpForShift:
         await db_session.refresh(shift)
 
         # Fill the shift
-        signup = SignUp(shift_id=shift.id, name="First Person", email="first@example.com")
+        signup = SignUp(
+            shift_id=shift.id, name="First Person", email="first@example.com"
+        )
         db_session.add(signup)
         await db_session.commit()
 
@@ -247,8 +267,11 @@ class TestSignUpForShift:
 # GET /orgs/{slug}/signups — getOrgSignups (admin endpoint)
 # ────────────────────────────────────────────────────────────────
 
+
 class TestGetOrgSignups:
-    async def test_get_signups_with_valid_token(self, async_client, db_session: AsyncSession, sample_org: Org):
+    async def test_get_signups_with_valid_token(
+        self, async_client, db_session: AsyncSession, sample_org: Org
+    ):
         shift = Shift(
             org_id=sample_org.id,
             title="Admin Shift",

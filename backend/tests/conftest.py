@@ -33,7 +33,9 @@ from app.models import Org, Shift, SignUp  # noqa: F401 -- ensures tables are re
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
 engine = create_async_engine(TEST_DATABASE_URL, echo=False, future=True)
-AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+AsyncSessionLocal = async_sessionmaker(
+    engine, class_=AsyncSession, expire_on_commit=False
+)
 
 
 async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
@@ -82,7 +84,9 @@ async def db_session(_db_engine) -> AsyncGenerator[AsyncSession, None]:
 @pytest_asyncio.fixture
 async def async_client(db_session) -> AsyncGenerator[AsyncClient, None]:
     """Provide an async HTTP client for endpoint tests."""
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as client:
         yield client
 
 
