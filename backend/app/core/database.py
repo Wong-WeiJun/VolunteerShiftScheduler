@@ -6,7 +6,10 @@ from sqlalchemy import select
 from typing import Annotated
 from app.models import Org
 
-engine = create_async_engine(str(settings.SQLALCHEMY_DATABASE_URI))
+engine = create_async_engine(
+    str(settings.SQLALCHEMY_DATABASE_URI),
+    pool_pre_ping=True,
+)
 
 AsyncSessionLocal = async_sessionmaker(
     engine,
