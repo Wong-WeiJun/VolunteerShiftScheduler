@@ -39,3 +39,8 @@ if settings.all_cors_origins:
     )
 
 app.include_router(org.router)
+
+
+@app.get("/health", tags=["health"])
+async def health_check():
+    return {"status": "ok"}
