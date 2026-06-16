@@ -23,9 +23,6 @@ class OrgResponse(CamelModel):
     slug: str = Field(max_length=160)
     admin_token: str
 
-    class Config:
-        from_attributes = True
-
 
 class ShiftResponse(CamelModel):
     id: UUID
