@@ -1,11 +1,6 @@
 from uuid import UUID
 
-from fastapi import (
-    APIRouter,
-    Depends,
-    HTTPException,
-    status,
-)
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from app.core.config import settings
 from typing import Any, Annotated
 from app.models import Org, Shift, SignUp
@@ -28,6 +23,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 import re
 import secrets
+from app.utils import send_signup_confirmation
 
 router = APIRouter(prefix="/orgs", tags=["orgs"])
 
@@ -194,6 +190,7 @@ async def signupForShift(
     slug: str,
     shift_id: UUID,
     payload: SignUpCreate,
+    background_tasks: BackgroundTasks,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> SignUpResponse:
     statement = (
@@ -219,6 +216,10 @@ async def signupForShift(
             status_code=status.HTTP_409_CONFLICT, detail="This shift is full"
         )
 
+    org_statement = select(Org.name).where(Org.slug == slug)
+    org_result = await db.execute(org_statement)
+    org_name = org_result.scalar_one()
+
     new_signup = SignUp(
         shift_id=shift_id,
         name=payload.name,
@@ -227,6 +228,14 @@ async def signupForShift(
     db.add(new_signup)
     await db.commit()
     await db.refresh(new_signup)
+
+    background_tasks.add_task(
+        send_signup_confirmation,
+        volunteer_name=new_signup.name,
+        volunteer_email=new_signup.email,
+        org_name=org_name,
+        shift=shift_obj,
+    )
 
     return SignUpResponse(
         id=new_signup.id,
