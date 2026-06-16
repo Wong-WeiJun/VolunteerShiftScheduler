@@ -7,7 +7,11 @@ from app.models import Shift
 import base64
 
 
-resend.api_key = settings.RESEND_KEY
+def _init_resend() -> bool:
+    if settings.RESEND_KEY:
+        resend.api_key = settings.RESEND_KEY
+        return True
+    return False
 
 
 def generate_ics(
@@ -43,6 +47,9 @@ def send_signup_confirmation(
     org_name: str,
     shift: Shift,
 ) -> None:
+    if not _init_resend():
+        return  # Silently skip if no RESEND_KEY is configured
+
     ics_bytes = generate_ics(
         shift_title=shift.title,
         shift_date=shift.date,
