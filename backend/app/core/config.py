@@ -40,23 +40,38 @@ class Settings(BaseSettings):
         list[AnyUrl] | str, BeforeValidator(parse_cors)
     ] = []
 
+    RENDER_EXTERNAL_URL: str | None = None
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def all_cors_origins(self) -> list[str]:
-        return [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS] + [
+        origins = [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS] + [
             self.FRONTEND_HOST
         ]
+        if self.RENDER_EXTERNAL_URL:
+            origins.append(self.RENDER_EXTERNAL_URL.rstrip("/"))
+        return origins
 
     PROJECT_NAME: str
-    POSTGRES_SERVER: str
+    POSTGRES_SERVER: str | None = None
     POSTGRES_PORT: int = 5432
-    POSTGRES_USER: str
+    POSTGRES_USER: str | None = None
     POSTGRES_PASSWORD: str = ""
     POSTGRES_DB: str = ""
 
-    @computed_field  # type: ignore[prop-decorator]
-    @property
-    def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
+    DATABASE_URL: str | None = None
+
+    def _build_database_uri(self) -> PostgresDsn:
+        if self.DATABASE_URL:
+            url = self.DATABASE_URL
+            # Ensure we use psycopg (async driver)
+            if url.startswith("postgresql://"):
+                url = url.replace("postgresql://", "postgresql+psycopg://", 1)
+            elif url.startswith("postgres://"):
+                url = url.replace("postgres://", "postgresql+psycopg://", 1)
+            return PostgresDsn(url)
+
+        # Fall back to building from individual components (local / Docker)
         return PostgresDsn.build(
             scheme="postgresql+psycopg",
             username=self.POSTGRES_USER,
@@ -65,6 +80,11 @@ class Settings(BaseSettings):
             port=self.POSTGRES_PORT,
             path=self.POSTGRES_DB,
         )
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
+        return self._build_database_uri()
 
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
@@ -92,7 +112,7 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
 
-    RESEND_KEY: str
+    RESEND_KEY: str | None = None
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":
