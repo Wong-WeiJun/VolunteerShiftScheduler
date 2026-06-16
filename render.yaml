@@ -1,0 +1,47 @@
+# Render Blueprint — infra as code for Render.com
+#
+# This creates a Python Web Service for the backend.
+# It does NOT create a Render database (we use Neon instead).
+#
+# To use:
+#   1. Push this file to your repo
+#   2. In Render dashboard → Blueprints → New Blueprint Instance
+#   3. After creation, go to the Web Service's Environment and set:
+#      - DATABASE_URL = your Neon connection string
+#      - RESEND_KEY   = your Resend API key (optional)
+#   4. After Vercel is live, update FRONTEND_HOST and BACKEND_CORS_ORIGINS
+
+services:
+  - type: web
+    name: shiftmate-backend
+    runtime: python
+    plan: free
+    region: singapore
+    buildCommand: cd backend && pip install -r requirements.txt
+    startCommand: cd backend && gunicorn app.main:app -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHONPATH
+        value: /opt/render/project/src/backend
+      - key: DATABASE_URL
+        sync: false                    # Set in Render dashboard → your Neon connection string
+      - key: PROJECT_NAME
+        value: ShiftMate
+      - key: FRONTEND_HOST
+        value: https://shiftmate.vercel.app   # Update with your actual Vercel URL
+      - key: BACKEND_CORS_ORIGINS
+        value: "https://shiftmate.vercel.app,https://shiftmate-*.vercel.app"
+      - key: ENVIRONMENT
+        value: production
+      - key: FIRST_SUPERUSER
+        value: admin@shiftmate.app
+      - key: FIRST_SUPERUSER_PASSWORD
+        generateValue: true
+      - key: SECRET_KEY
+        generateValue: true
+      - key: RESEND_KEY
+        sync: false                    # Optional — set in Render dashboard
+      - key: EMAILS_FROM_EMAIL
+        value: noreply@shiftmate.app
+      - key: SENTRY_DSN
+        sync: false                    # Optional — set in Render dashboard
+    healthCheckPath: /health
