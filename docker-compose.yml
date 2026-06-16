@@ -36,6 +36,11 @@ services:
       FRONTEND_HOST: http://localhost:5173
       BACKEND_CORS_ORIGINS: "http://localhost,http://localhost:5173"
       ENVIRONMENT: local
+      RESEND_KEY: ${RESEND_KEY}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      EMAILS_FROM_EMAIL: ${EMAILS_FROM_EMAIL:-}
     depends_on:
       db:
         condition: service_healthy
