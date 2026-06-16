@@ -32,21 +32,12 @@ async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
 }
 
 export interface Org {
-  id: number
+  id: string
   slug: string
   name: string
-  admin_email: string
-  admin_token: string
+  adminEmail: string
+  adminToken: string
   createdAt: string
-}
-
-export interface Signup {
-  id: number
-  volunteerName: string
-  volunteerEmail: string
-  signedUpAt: string
-  shiftId: number
-  shift?: Shift
 }
 
 export interface Shift {
@@ -60,15 +51,11 @@ export interface Shift {
   capacity: number
   notes: string | null
   createdAt: string
-  signupsCount?: number
-}
-
-export interface ShiftWithSignupCount extends Shift {
   signupCount: number
 }
 
 export interface OrgWithShifts extends Org {
-  shifts: ShiftWithSignupCount[]
+  shifts: Shift[]
 }
 
 export interface CreateOrgInput {
