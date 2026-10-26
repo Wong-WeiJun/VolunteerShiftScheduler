@@ -17,7 +17,7 @@
 
 | | Link |
 |---|---|
-| 🚀 **Live Demo** | [https://shiftmate.vercel.app](https://shiftmate-project.vercel.app/) |
+| 🚀 **Live Demo** | [https://shiftmate-project.vercel.app/](https://shiftmate-project.vercel.app/) |
 | 📖 **API Docs** | [https://shiftmate-backend.onrender.com/docs](https://shiftmate-backend.onrender.com/docs) |
 | 🏗️ **Backend** | Render + FastAPI |
 | 🎨 **Frontend** | Vercel + React + Vite |
@@ -110,7 +110,7 @@ For this use case, passwords and login flows add friction. A cryptographically r
 ### One-line local setup (Docker)
 
 ```bash
-git clone https://github.com/wongweijun/shiftmate.git
+git clone https://github.com/Wong-WeiJun/VolunteerShiftScheduler.git
 cd shiftmate
 cp .env.example .env
 # Edit .env with your values, then:
