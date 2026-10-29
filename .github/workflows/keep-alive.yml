@@ -1,0 +1,22 @@
+# Ping Render free-tier backend so it doesn't spin down after 15 min of idle.
+# https://render.com/docs/free#spinning-down-on-idle
+#
+# Note: Free instances get 750 hours/month. Keeping awake 24/7 uses nearly all
+# of them; the service may suspend late in long months until hours reset.
+name: Keep Render Awake
+
+on:
+  schedule:
+    # Every 10 minutes — under Render's 15-minute idle spin-down window
+    - cron: "*/10 * * * *"
+  workflow_dispatch: # Allow manual runs from Actions tab
+
+jobs:
+  ping:
+    name: Ping /health
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hit health endpoint
+        run: |
+          curl -fsS --retry 3 --retry-delay 5 --max-time 90 \
+            "https://shiftmate-backend.onrender.com/health"
